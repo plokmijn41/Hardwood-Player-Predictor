@@ -19,7 +19,7 @@ This tool predicts a basketball player's skill ratings at age 22 based on their 
 ## To Run Locally
 
 1. Clone the repo:
-git clone https://github.com/yourusername/Hardwood-Player-Predictor.git
+git clone https://github.com/plokmijn41/Hardwood-Player-Predictor.git
 cd Hardwood-Player-Predictor
 
 
