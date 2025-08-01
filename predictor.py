@@ -101,19 +101,31 @@ def predict_skills(initial, current, age_now, pot):
             growth = (curr - init) / (age_now - AGE_START) if age_now > AGE_START else 0
             raw[skill] = curr + (AGE_TARGET - age_now) * growth
 
-    floored = {s: math.floor(min(v, 20)) if v is not None else None for s, v in raw.items()}
-    total_si = sum(v for v in floored.values() if v is not None)
+    # Pre-floor values but cap at 20
+    floored = {
+        s: math.floor(min(v, 20)) if v is not None else None
+        for s, v in raw.items()
+    }
 
+    total_si = sum(v for v in floored.values() if v is not None)
     capped = False
+
     if si_cap is not None and total_si > si_cap:
         scaling_factor = si_cap / total_si
-        floored = {
-            s: math.floor(min(v * scaling_factor, 20)) if v is not None else None
-            for s, v in raw.items()
-        }
+        adjusted = {}
+        for s, v in raw.items():
+            if v is None:
+                adjusted[s] = None
+                continue
+            scaled = v * scaling_factor
+            # Floor scaled value, cap at 20, and never drop below current skill
+            adjusted_value = max(math.floor(min(scaled, 20)), current.get(s, 0))
+            adjusted[s] = adjusted_value
+        predicted = adjusted
         capped = True
+    else:
+        predicted = floored
 
-    predicted = floored
     final_si = sum(v for v in predicted.values() if v is not None)
     return predicted, final_si, capped
 
