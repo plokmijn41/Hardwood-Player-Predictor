@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hardwood Player Predictor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f2f5;
+      padding: 2rem;
+    }
+    .section-card {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    h1 {
+      font-size: 2.25rem;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .skill-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .skill-name {
+      width: 160px;
+      font-weight: 500;
+    }
+    .bar-wrapper {
+      flex-grow: 1;
+      background-color: #e6e6e6;
+      height: 16px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-right: 10px;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, #0033cc, #990033);
+    }
+    .bar-value {
+      min-width: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mb-4 text-center">🏀 Hardwood Player Predictor</h1>
+
+    <div class="section-card">
+      <form method="post">
+        <label for="player_url" class="form-label">Enter a player URL:</label>
+        <input type="text" name="player_url" id="player_url" class="form-control mb-3"
+               placeholder="http://onlinecollegebasketball.org/player/224284" required>
+        <button type="submit" class="btn btn-primary w-100">Predict Skills</button>
+      </form>
+    </div>
+
+    {% if result %}
+      {% if result.error %}
+        <div class="alert alert-danger mt-4">{{ result.error }}</div>
+      {% else %}
+
+        <div class="section-card">
+          <div class="section-title">📊 Player Info</div>
+          <p><strong>Age:</strong> {{ result.age }}</p>
+          <p><strong>Potential:</strong> {{ result.pot }}</p>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">🟣 Predicted Skills (Age 22)</div>
+          {% set skill_labels = {
+              'IS': 'Inside Shot',
+              'OS': 'Outside Shot',
+              'RNG': 'Shooting Range',
+              'FIN': 'Finishing',
+              'REB': 'Rebounding',
+              'ID': 'Interior Defense',
+              'PD': 'Perimeter Defense',
+              'IQ': 'Basketball IQ',
+              'PASS': 'Passing',
+              'HND': 'Ball Handling',
+              'DRV': 'Driving',
+              'STR': 'Strength',
+              'SPD': 'Speed',
+              'STA': 'Stamina'
+          } %}
+
+          {% for key in ['IS','OS','RNG','FIN','REB','ID','PD','IQ','PASS','HND','DRV','STR','SPD','STA'] %}
+            <div class="skill-bar">
+              <div class="skill-name">{{ skill_labels[key] }}:</div>
+              <div class="bar-wrapper">
+                <div class="bar-fill" style="width: {{ (result.predicted[key] / 20) * 100 if result.predicted[key] is not none else 0 }}%"></div>
+              </div>
+              <div class="bar-value">{{ result.predicted[key] if result.predicted[key] is not none else 'N/A' }}</div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">📈 Predicted SI</div>
+          <p><strong>Predicted SI:</strong> {{ result.predicted_si }}</p>
+          <p>
+            {% if result.si_capped %}
+              📉 SI was capped due to potential.
+            {% else %}
+              ✅ No SI cap applied.
+            {% endif %}
+          </p>
+        </div>
+
+      {% endif %}
+    {% endif %}
+  </div>
+</body>
+</html>
